@@ -19,7 +19,7 @@ class Albuns extends React.Component {
 }
 
 Albuns.propTypes = {
-  collectionId: PropTypes.string.isRequired,
+  collectionId: PropTypes.number.isRequired,
   imageThum: PropTypes.string.isRequired,
   nameArt: PropTypes.string.isRequired,
   nameAlb: PropTypes.string.isRequired,
