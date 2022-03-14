@@ -4,7 +4,7 @@ import musicsAPI from '../services/musicsAPI';
 import Carregando from './Carregando';
 import MusicCard from '../components/MusicCard';
 import Header from '../components/Header';
-import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
+import { addSong, getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
@@ -34,15 +34,23 @@ class Album extends React.Component {
     });
   }
 
- addFav = async (event) => {
+ addFav = async ({ target }) => {
    const { state } = this;
-   event.preventDefault();
-   const tarNun = parseInt(event.target.id, 10);
-   const favMusic = state.listMusics.find((ele) => ele.trackId === tarNun);
-   this.setState({ carregar: true });
-   await addSong(favMusic);
-   const favMu = await getFavoriteSongs();
-   this.setState({ carregar: false, favmu: favMu });
+   if (target.checked === false) {
+     const intnu = parseInt(target.id, 10);
+     const reFav = state.listMusics.find((ele) => ele.trackId === intnu);
+     this.setState({ carregar: true });
+     await removeSong(reFav);
+     const refavMu = await getFavoriteSongs();
+     this.setState({ carregar: false, favmu: refavMu });
+   } else {
+     const tarNun = parseInt(target.id, 10);
+     const favMusic = state.listMusics.find((ele) => ele.trackId === tarNun);
+     this.setState({ carregar: true });
+     await addSong(favMusic);
+     const favMu = await getFavoriteSongs();
+     this.setState({ carregar: false, favmu: favMu });
+   }
  }
 
  render() {
