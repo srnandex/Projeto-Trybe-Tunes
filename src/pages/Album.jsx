@@ -4,6 +4,7 @@ import musicsAPI from '../services/musicsAPI';
 import Carregando from './Carregando';
 import MusicCard from '../components/MusicCard';
 import Header from '../components/Header';
+import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
@@ -13,12 +14,14 @@ class Album extends React.Component {
       nameArtist: '',
       listMusics: [],
       carregar: true,
+      favmu: [],
     };
   }
 
   async componentDidMount() {
     const { match: { params: { id } } } = this.props;
     const musicas = await musicsAPI(id);
+    const favMu = await getFavoriteSongs();
     const alb = musicas[0].collectionName;
     const art = musicas[0].artistName;
     const List = [...musicas.slice(1)];
@@ -27,31 +30,45 @@ class Album extends React.Component {
       carregar: false,
       nameAlbum: alb,
       nameArtist: art,
+      favmu: favMu,
     });
   }
 
-  render() {
-    const { state } = this;
-    console.log(state.listMusics);
-    return (
-      <div data-testid="page-album">
-        <header>
-          <Header />
-        </header>
-        <section>
-          <h2 data-testid="album-name">{ state.nameAlbum }</h2>
-          <h3 data-testid="artist-name">{ state.nameArtist }</h3>
-          {state.carregar ? <Carregando /> : state.listMusics.map((elemet) => (
-            <MusicCard
-              key={ elemet.trackId }
-              trName={ elemet.trackName }
-              previewUrl={ elemet.previewUrl }
-            />
-          ))}
-        </section>
-      </div>
-    );
-  }
+ addFav = async (event) => {
+   const { state } = this;
+   event.preventDefault();
+   const tarNun = parseInt(event.target.id, 10);
+   const favMusic = state.listMusics.find((ele) => ele.trackId === tarNun);
+   this.setState({ carregar: true });
+   await addSong(favMusic);
+   const favMu = await getFavoriteSongs();
+   this.setState({ carregar: false, favmu: favMu });
+ }
+
+ render() {
+   const { state } = this;
+   return (
+     <div data-testid="page-album">
+       <header>
+         <Header />
+       </header>
+       <section>
+         <h2 data-testid="album-name">{ state.nameAlbum }</h2>
+         <h3 data-testid="artist-name">{ state.nameArtist }</h3>
+         {state.carregar ? <Carregando /> : state.listMusics.map((elemet) => (
+           <MusicCard
+             key={ elemet.trackId }
+             fav={ this.addFav }
+             muFav={ state.favmu }
+             trackId={ elemet.trackId }
+             trackName={ elemet.trackName }
+             previewUrl={ elemet.previewUrl }
+           />
+         ))}
+       </section>
+     </div>
+   );
+ }
 }
 
 Album.propTypes = {
